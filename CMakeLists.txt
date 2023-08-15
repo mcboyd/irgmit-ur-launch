@@ -3,16 +3,44 @@ project(irgmit_ur_launch)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
+#add_compile_options(-I/usr/include/python2.7 -I/usr/include/x86_64-linux-gnu/python2.7  -fno-strict-aliasing -Wdate-time -D_FORTIFY_SOURCE=2 -g -fdebug-prefix-map=/build/python2.7-D7NSzq/python2.7-2.7.17=. -fstack-protector-strong -Wformat -Werror=format-security  -DNDEBUG -g -fwrapv -O2 -Wall)
+
+#set(CMAKE_EXE_LINKER_FLAGS -L/usr/lib/python2.7/config-x86_64-linux-gnu -L/usr/lib -lpython2.7 -lpthread -ldl  -lutil -lm  -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions)
+
+#set(BOOST_ROOT "/home/irg/boost_1_82_0")
+#set(${PROJECT_NAME}_SOURCES)
+set(${PROJECT_NAME}_LIBS)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  ur_robot_driver
+  #ur_robot_driver
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+find_package(ur_client_library REQUIRED)
+
+############################## Set up Libraries ################################
+set(Boost_USE_STATIC_LIBS       OFF)
+set(Boost_USE_MULTITHREADED      ON)
+set(Boost_USE_STATIC_RUNTIME    OFF)
+find_package(Boost 1.58 COMPONENTS system program_options regex filesystem timer thread QUIET REQUIRED )
+include_directories(${Boost_INCLUDE_DIRS} )
+list(APPEND ${PROJECT_NAME}_LIBS ${Boost_LIBRARIES})
+
+################################ Source Files ##################################
+#list(APPEND ${PROJECT_NAME}_SOURCES
+#    include/logger.h
+#    include/executor_lpc.h
+#    src/executor_lpc.cpp
+#)
+include_directories (${PROJECT_SOURCE_DIR}/include)
+#add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES})
+#set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")
+#target_link_libraries(${PROJECT_NAME} ${${PROJECT_NAME}_LIBS})
+
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -132,6 +160,8 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/irgmit_ur_launch_node.cpp)
+add_executable(freedrive_example src/freedrive_example.cpp)
+target_link_libraries(freedrive_example ${${PROJECT_NAME}_LIBS} ur_client_library::urcl)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
