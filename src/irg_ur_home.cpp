@@ -20,9 +20,9 @@
 using namespace urcl;
 
 const std::string DEFAULT_ROBOT_IP = "172.16.0.10";
-const std::string SCRIPT_FILE = "resources/external_control.urscript";
-const std::string OUTPUT_RECIPE = "resources/rtde_output_recipe.txt";
-const std::string INPUT_RECIPE = "resources/rtde_input_recipe.txt";
+const std::string SCRIPT_FILE = "/home/irg/catkin_ws/src/irgmit_ur_launch/resources/external_control.urscript";
+const std::string OUTPUT_RECIPE = "/home/irg/catkin_ws/src/irgmit_ur_launch/resources/rtde_output_recipe.txt";
+const std::string INPUT_RECIPE = "/home/irg/catkin_ws/src/irgmit_ur_launch/resources/rtde_input_recipe.txt";
 const std::string CALIBRATION_CHECKSUM = "calib_1919144596799550491";
 
 std::unique_ptr<DashboardClient> g_my_dashboard;

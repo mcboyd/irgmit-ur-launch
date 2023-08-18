@@ -38,16 +38,22 @@
 #include <boost/thread.hpp>
 #include <unistd.h>
 
-// #include <Python.h>
-
 using namespace boost::process;
 using namespace urcl;
 
 const std::string DEFAULT_ROBOT_IP = "172.16.0.10";
-const std::string SCRIPT_FILE = "resources/external_control.urscript";
-const std::string OUTPUT_RECIPE = "resources/rtde_output_recipe.txt";
-const std::string INPUT_RECIPE = "resources/rtde_input_recipe.txt";
+const std::string SCRIPT_FILE = "/home/irg/catkin_ws/src/irgmit_ur_launch/resources/external_control.urscript";
+const std::string OUTPUT_RECIPE = "/home/irg/catkin_ws/src/irgmit_ur_launch/resources/rtde_output_recipe.txt";
+const std::string INPUT_RECIPE = "/home/irg/catkin_ws/src/irgmit_ur_launch/resources/rtde_input_recipe.txt";
 const std::string CALIBRATION_CHECKSUM = "calib_1919144596799550491";
+const std::string SOCAT_CMD = "socat pty,link=/tmp/ttyUR,raw,ignoreeof,waitslave tcp:172.16.0.10:54321";
+const std::string GRIPPER_CMD = "python /home/irg/catkin_ws/src/robotiq/robotiq_2f_gripper_control/scripts/robotiq_2f_standalone_client.py";
+const std::string SAVE_FILE = "/home/irg/museum_recordings/txts/users/output.txt";
+const double CUBE_DIM = 0.035;  // 35mm
+const double SINK_X = 0.4330208551070603; // + CUBE_DIM;
+const double SINK_Y = -0.4609244169054163; // - CUBE_DIM;
+const double SINK_Z = 0.3358450828078722; // + CUBE_DIM;
+
 
 std::unique_ptr<DashboardClient> g_my_dashboard;
 
@@ -130,8 +136,8 @@ int main(int argc, char* argv[])
 
   input_queue.push_back("o\n");
 
-  child socat("socat pty,link=/tmp/ttyUR,raw,ignoreeof,waitslave tcp:172.16.0.10:54321");
-  child gripper("python /home/irg/catkin_ws/src/robotiq/robotiq_2f_gripper_control/scripts/robotiq_2f_standalone_client.py", std_in < p_in);
+  child socat(SOCAT_CMD);
+  child gripper(GRIPPER_CMD, std_in < p_in);
   in_mutex.lock();
   boost::asio::async_write(p_in,boost::asio::buffer(input_queue.front()),[&](const boost::system::error_code & ec, std::size_t n){ });
   in_mutex.unlock();
@@ -161,9 +167,6 @@ int main(int argc, char* argv[])
 
     g_my_driver->registerTrajectoryDoneCallback(&handleTrajectoryState);
 
-    
-    double x = 0.0, y = 0.0, z = 0.0;
-
     // Setup cartesian moves to pickup cube and move to starting location
     urcl::vector6d_t grasp, inspection_start, g_tcp_pose;
     grasp[0] = -0.359541785191785;
@@ -173,7 +176,6 @@ int main(int argc, char* argv[])
     grasp[4] = -2.3146799;
     grasp[5] = 0.027137563;
     inspection_start[0] = -0.1008749399845134;
-    // inspection_start[0] = 0.44;
     inspection_start[1] = -0.4609244169054163;
     inspection_start[2] = 0.3358450828078722;
     inspection_start[3] = 2.0812724;
@@ -231,7 +233,7 @@ int main(int argc, char* argv[])
     URCL_LOG_INFO("Second move completed.");
 
     // Third close the gripper on the cube
-    input_queue.push_back("c\n");
+    input_queue.push_back("x\n");  // "x" (or any input other than o, c, or q) tells it to close to 30mm stroke, slightly smaller than the 35mm cube
     in_mutex.lock();
     boost::asio::async_write(p_in,boost::asio::buffer(input_queue.front()),[&](const boost::system::error_code & ec, std::size_t n){ });
     in_mutex.unlock();
@@ -302,11 +304,7 @@ int main(int argc, char* argv[])
     g_my_driver->writeKeepalive();
     sendFreedriveMessageOrDie(g_my_driver, control::FreedriveControlMessage::FREEDRIVE_START);
 
-    std::cout << grasp[3] << "," << grasp[4] << "," << grasp[5] << std::endl;
-    // g_my_driver->writeKeepalive();
-
-    // sink location: 0.4330208551070603, -0.4609244169054163, 0.3358450828078722
-
+    // std::cout << grasp[3] << "," << grasp[4] << "," << grasp[5] << std::endl;
 
     while (true)
     {
@@ -331,12 +329,12 @@ int main(int argc, char* argv[])
           // csv_data.assign({ data_pkg->toCsv() });
           // std::cout << data_pkg->toCsv();
           URCL_LOG_INFO("Timeout reached.");
-          std::cout << data_pkg->toString();
+          // std::cout << data_pkg->toString();
           // std::cout << "tcp data: " << test[0] << ", " << test[1] <<  std::endl;
           break;
         }
         
-        if (test[0] > 0.44 && test[1] < -0.47 && test[2] > 0.34)
+        if (test[0] > SINK_X && test[1] < SINK_Y && test[2] > SINK_Z)
         {
           input_queue.push_back("o\n");
           in_mutex.lock();
@@ -345,8 +343,8 @@ int main(int argc, char* argv[])
           input_queue.pop_front();
           // std::cout << data_pkg->toCsv();
           URCL_LOG_INFO("Sink reached.");
-          std::cout << data_pkg->toString();
-          std::cout << "tcp data: " << test[0] << ", " << test[1] <<  std::endl;
+          // std::cout << data_pkg->toString();
+          // std::cout << "tcp data: " << test[0] << ", " << test[1] <<  std::endl;
           break;
         }
       }
@@ -372,13 +370,10 @@ int main(int argc, char* argv[])
 
   // Outputting data in list captured during teaching to disk
   std::cout << "The elements of the TCP pose list are being written to disk..." << std::endl;
-  std::ofstream output("output.txt");
+  std::ofstream output(SAVE_FILE);
   for (std::string& a : csv_data)
     output << a << "\n";
 
   return 0;  
 
 }
-
-// Socat command that works (must be launched AFTER above code is running):
-// socat pty,link=/tmp/ttyUR,raw,ignoreeof,waitslave tcp:172.16.0.10:54321
