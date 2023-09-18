@@ -163,6 +163,9 @@ include_directories(
 add_executable(freedrive_example src/freedrive_example.cpp)
 target_link_libraries(freedrive_example ${${PROJECT_NAME}_LIBS} ur_client_library::urcl)
 
+add_executable(irg_ur_home src/irg_ur_home.cpp)
+target_link_libraries(irg_ur_home ${${PROJECT_NAME}_LIBS} ur_client_library::urcl)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -184,6 +187,11 @@ target_link_libraries(freedrive_example ${${PROJECT_NAME}_LIBS} ur_client_librar
 
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
+
+catkin_install_python(PROGRAMS 
+      scripts/external_control_disable.py
+      scripts/external_control_enable.py
+                      DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination

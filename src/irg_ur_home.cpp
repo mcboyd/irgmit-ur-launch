@@ -60,7 +60,7 @@ void handleTrajectoryState(control::TrajectoryResult state)
 
 int main(int argc, char* argv[])
 {
-  urcl::setLogLevel(urcl::LogLevel::INFO);
+  urcl::setLogLevel(urcl::LogLevel::NONE);
 
   std::string robot_ip = DEFAULT_ROBOT_IP;
 
@@ -82,13 +82,6 @@ int main(int argc, char* argv[])
 
   // Now the robot is ready to receive a program
   std::unique_ptr<ToolCommSetup> tool_comm_setup;
-  tool_comm_setup.reset(new urcl::ToolCommSetup());
-  tool_comm_setup->setBaudRate(115200);
-  tool_comm_setup->setToolVoltage(ToolVoltage::_24V);
-  tool_comm_setup->setParity(Parity::NONE);
-  tool_comm_setup->setStopBits(1);
-  tool_comm_setup->setRxIdleChars(1.5);
-  tool_comm_setup->setTxIdleChars(3.5);
 
   const bool HEADLESS = true;
   
