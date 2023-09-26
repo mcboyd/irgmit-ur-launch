@@ -169,15 +169,15 @@ int main(int argc, char* argv[])
 
     // Setup cartesian moves to pickup cube and move to starting location
     urcl::vector6d_t grasp, inspection_start, g_tcp_pose;
-    grasp[0] = -0.359541785191785;
-    grasp[1] = -0.43876006460910113;
-    grasp[2] = 0.4009993552206437;
+    grasp[0] = -0.34902;
+    grasp[1] = -0.33041;
+    grasp[2] = 0.32152;  // Added 0.05 to original value of 0.27152 to account for motion to pick-up cube
     grasp[3] = 2.0812724;
     grasp[4] = -2.3146799;
     grasp[5] = 0.027137563;
-    inspection_start[0] = -0.1008749399845134;
-    inspection_start[1] = -0.4609244169054163;
-    inspection_start[2] = 0.3358450828078722;
+    inspection_start[0] = -0.25031;
+    inspection_start[1] = -0.41036;
+    inspection_start[2] = 0.336;
     inspection_start[3] = 2.0812724;
     inspection_start[4] = -2.3146799;
     inspection_start[5] = 0.027137563;
