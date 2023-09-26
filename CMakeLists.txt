@@ -166,6 +166,9 @@ target_link_libraries(freedrive_example ${${PROJECT_NAME}_LIBS} ur_client_librar
 add_executable(irg_ur_home src/irg_ur_home.cpp)
 target_link_libraries(irg_ur_home ${${PROJECT_NAME}_LIBS} ur_client_library::urcl)
 
+add_executable(open_gripper src/open_gripper.cpp)
+target_link_libraries(open_gripper ${${PROJECT_NAME}_LIBS} ur_client_library::urcl)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
