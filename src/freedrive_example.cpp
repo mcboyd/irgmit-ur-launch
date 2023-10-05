@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
   tool_comm_setup->setRxIdleChars(1.5);
   tool_comm_setup->setTxIdleChars(3.5);
 
-  sleep(5);
+  sleep(2);
 
   int counter = 0;
 
@@ -169,9 +169,9 @@ int main(int argc, char* argv[])
 
     // Setup cartesian moves to pickup cube and move to starting location
     urcl::vector6d_t grasp, inspection_start, g_tcp_pose;
-    grasp[0] = -0.34902;
-    grasp[1] = -0.33041;
-    grasp[2] = 0.32152;  // Added 0.05 to original value of 0.27152 to account for motion to pick-up cube
+    grasp[0] = -0.36822;
+    grasp[1] = -0.35133;
+    grasp[2] = 0.31919;  // Added 0.05 to original value of 0.26919 to account for motion to pick-up cube
     grasp[3] = 2.0812724;
     grasp[4] = -2.3146799;
     grasp[5] = 0.027137563;
@@ -238,10 +238,10 @@ int main(int argc, char* argv[])
     boost::asio::async_write(p_in,boost::asio::buffer(input_queue.front()),[&](const boost::system::error_code & ec, std::size_t n){ });
     in_mutex.unlock();
     input_queue.pop_front();
-    // Basically pause for 5 seconds to allow the gripper time to close
+    // Basically pause for 1 seconds to allow the gripper time to close
     // It would be better if this was watching the output queue of the gripper process for feedback
     // ... OR if the python gripper driver class was imported and used directly in this code...
-    while (counter<2500) {
+    while (counter<500) {
       std::unique_ptr<rtde_interface::DataPackage> data_pkg = g_my_driver->getDataPackage();
       if (data_pkg)
       {
